@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    name: Build, test, and package
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Build release CLI
+        run: swift build -c release --product macready
+      - name: Test snapshot semantics
+        run: swift test
+      - name: Verify CLI version and JSON output
+        run: |
+          test "$(.build/release/macready --version)" = "macready $(cat VERSION)"
+          .build/release/macready status --json > "$RUNNER_TEMP/macready.json"
+          python3 -m json.tool "$RUNNER_TEMP/macready.json" > /dev/null
+      - name: Build local universal package
+        env:
+          SKIP_SIGNING: 'true'
+        run: DIST_DIR="$RUNNER_TEMP/macready-pkg" ./scripts/build-pkg.sh
+      - name: Inspect package without installing
+        run: |
+          pkgutil --expand-full "$RUNNER_TEMP/macready-pkg/MacReady.pkg" "$RUNNER_TEMP/macready-expanded"
+          test -s "$RUNNER_TEMP/macready-expanded/Distribution"
+          cli_path=$(find "$RUNNER_TEMP/macready-expanded" -type f -path '*/usr/local/bin/macready' -print -quit)
+          test -n "$cli_path"
+          lipo "$cli_path" -verify_arch arm64 x86_64
+          codesign --verify --strict "$cli_path"
+          test "$("$cli_path" --version)" = "macready $(cat VERSION)"
+          (cd "$RUNNER_TEMP/macready-pkg" && shasum -a 256 -c SHA256SUMS.txt)
