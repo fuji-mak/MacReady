@@ -6,7 +6,10 @@ MacReady is a small, read-only macOS CLI and agent Skill by [Taketo Fujimaki](ht
 
 [日本語](README.ja.md) · [Changelog](CHANGELOG.md) · [Release preparation](docs/releasing.md) · [MIT license](LICENSE)
 
-> **0.1.0 release candidate — not published yet.** The repository is private; packages and public access await the author's local review. There is no public download for this candidate yet.
+> **v0.1.0 — first public release, September 8, 2026.** MacReady is
+> independently usable and does not require Capsomnia.
+
+[Download MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
 
 ```sh
 macready status --json
@@ -23,9 +26,11 @@ MacReady exits after each snapshot. It does not require Capsomnia, elevated priv
 
 ## Install
 
-Requires **macOS 13.5 or later**. The package build targets Apple silicon and Intel.
+Requires **macOS 13.5 or later**. MacReady 0.1.0 ships as a universal
+Apple silicon / Intel package.
 
-For local review, open `dist/MacReady.pkg` after building it with the instructions below. The installer contains:
+Open the [MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg).
+The installer contains:
 
 | Component | Destination |
 | --- | --- |
@@ -35,7 +40,9 @@ For local review, open `dist/MacReady.pkg` after building it with the instructio
 
 The Skill contents are identical; Codex and Claude Code are installation destinations. Installer authentication is required to write `/usr/local/bin`; running MacReady needs no `sudo`. Skill choices target the user logged in to the Mac's console session.
 
-MacReady can also be included with `cpsm` and both Skills in **Capsomnia Tools**, downloaded from Capsomnia's advanced settings. The Capsomnia app package remains separate.
+MacReady can also be included with `cpsm` and both Skills in
+[Capsomnia Tools](https://github.com/fuji-mak/cpsm/releases/latest/download/Capsomnia-Tools.pkg),
+downloaded from Capsomnia's advanced settings. The Capsomnia app package remains separate.
 
 ## Use
 
@@ -107,14 +114,14 @@ swift test
 SKIP_SIGNING=true ./scripts/build-pkg.sh
 ```
 
-The package script builds both architectures by default and writes `dist/MacReady-0.1.0.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and review.
+The package script builds both architectures by default and writes `dist/MacReady-0.1.0.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and release verification.
 
 This repository also provides the `MacStateCore` Swift library. Capsomnia uses a vendored copy of that library for shared state observations; MacReady's executable has no dependency on the app. See [compatibility](docs/compatibility.md).
 
 ## Related projects and author
 
 - [Capsomnia](https://github.com/fuji-mak/Capsomnia): the Mac app that ties awake mode to Caps Lock.
-- **cpsm — Capsomnia CLI & Skill**: controls Capsomnia, including awake mode, timers, and settings. Its independent repository `fuji-mak/cpsm` is private during review.
+- [cpsm — Capsomnia CLI & Skill](https://github.com/fuji-mak/cpsm): controls Capsomnia, including awake mode, timers, and settings. It requires Capsomnia 4.0.0+; the generally available 3.5.0 app does not include its CLI service.
 - **MacReady**: observes the Mac's state and works independently.
 
 Created by [Taketo Fujimaki](https://github.com/fuji-mak). Explore the author's profile for related work and contact information. Contributions and reports should include the command, macOS version, Mac model, and any unavailable fields relevant to the issue.

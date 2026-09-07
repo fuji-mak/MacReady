@@ -6,7 +6,9 @@ AIエージェントに、Macの電源・バッテリー・熱・蓋・スリー
 
 [English](README.md) · [変更履歴](CHANGELOG.md) · [配布準備](docs/releasing.md) · [MITライセンス](LICENSE)
 
-> **0.1.0は未公開の配布候補です。** `fuji-mak/MacReady` は確認用のプライベートリポジトリです。作者のローカル確認後に一般公開する予定です。この候補版の公開ダウンロードはまだありません。
+> **v0.1.0は2026年9月8日に公開した初回リリースです。** MacReadyはCapsomniaを必要としない、単独利用可能なツールです。
+
+[MacReady.pkgをダウンロード](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
 
 ```sh
 macready status --json
@@ -23,9 +25,10 @@ Capsomniaアプリ、実行時のsudo、常駐、外部通信は不要です。�
 
 ## インストール
 
-**macOS 13.5以降**が必要です。パッケージはApple siliconとIntelの両方を対象にビルドします。
+**macOS 13.5以降**が必要です。MacReady 0.1.0のパッケージはApple silicon／Intelの
+universal binaryです。
 
-ローカル確認では、下記の手順で作成した`dist/MacReady.pkg`を開きます。
+[`MacReady.pkg`](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)を開きます。
 
 | 内容 | 配置先 |
 | --- | --- |
@@ -35,7 +38,8 @@ Capsomniaアプリ、実行時のsudo、常駐、外部通信は不要です。�
 
 Skill本文は同じで、CodexとClaude Codeは配置先の選択です。インストール時は`/usr/local/bin`への書き込みのため管理者認証が必要ですが、実行時は不要です。SkillはMacのコンソールセッションにログインしているユーザーのホームに配置します。
 
-Capsomniaの詳細設定から取得する**Capsomnia Tools**にも、`cpsm`と両方のSkillと一緒に含められます。Capsomniaアプリ本体のpkgとは別の配布物です。
+Capsomniaの詳細設定から取得する[**Capsomnia Tools**](https://github.com/fuji-mak/cpsm/releases/latest/download/Capsomnia-Tools.pkg)にも、
+`cpsm`と両方のSkillと一緒に含まれます。Capsomniaアプリ本体のpkgとは別の配布物です。
 
 ## 使い方
 
@@ -85,7 +89,7 @@ SKIP_SIGNING=true ./scripts/build-pkg.sh
 ## 関連作品・作者
 
 - [Capsomnia](https://github.com/fuji-mak/Capsomnia)：Caps Lockとスリープ抑止を結び付けるMacアプリ。
-- **cpsm — Capsomnia CLI & Skill**：Capsomniaのスリープ抑止・タイマー・設定を操作するツール。独立リポジトリを公開準備中です。
+- [**cpsm — Capsomnia CLI & Skill**](https://github.com/fuji-mak/cpsm)：Capsomniaのスリープ抑止・タイマー・設定を操作するツール。Capsomnia 4.0.0以降が必要で、一般公開中の3.5.0にはCLIの受付機能がありません。
 - **MacReady**：Macの状態を観測する、単独で動くツール。
 
 作者：[Taketo Fujimaki](https://github.com/fuji-mak)。関連作品や連絡先はプロフィールから確認できます。不具合の報告では、コマンド、macOSのバージョン、Macの機種、関係する取得不能項目を添えてください。

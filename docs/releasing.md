@@ -1,8 +1,9 @@
 # Release preparation
 
-MacReady 0.1.0 is a **local, unpublished release candidate**. The current preparation does not authorize publishing a repository, tag, or release, or submitting anything for notarization. The author reviews the local build first.
+MacReady 0.1.0 is the initial public release line. These steps remain the
+repeatable build, signing, notarization, and release verification workflow.
 
-## Review the candidate
+## Review the release build
 
 From this repository on macOS:
 
@@ -32,7 +33,7 @@ The package reads `VERSION`. Its outputs are:
 
 Environment variables: `DIST_DIR` changes the output directory; `CLI_PATH` supplies a prebuilt CLI; `ARCHS` chooses build architectures; `APP_SIGN_ID` and `PKG_SIGN_ID` select signing identities. Leave `CLI_PATH` unset for the standard universal release build.
 
-## Sign and notarize after review
+## Sign and notarize
 
 Use a Developer ID Application identity for the executable and a Developer ID Installer identity for the package. Override the default author identities when building a fork. Keep signing certificates, private keys, and notarization credentials outside the repository.
 
@@ -43,7 +44,6 @@ PKG_SIGN_ID='Developer ID Installer: Your Name (TEAMID)' \
 
 pkgutil --check-signature dist/MacReady-0.1.0.pkg
 
-# Only after approval to submit to Apple's service:
 NOTARY_PROFILE='your-keychain-profile' ./scripts/notarize-pkg.sh dist
 ```
 
@@ -57,10 +57,14 @@ spctl --assess --type install --verbose=2 dist/MacReady-0.1.0.pkg
 
 Re-test installation of this exact package on a clean review account or machine, including optional Skill choices, before sharing it publicly. Do not upload temporary build directories, component packages, signing material, or local verification snapshots.
 
-## Publish manually after approval
+## Publish manually
 
-The independent `fuji-mak/MacReady` repository already exists as a private repository for review. Change its visibility to public only when the author explicitly approves publication. Verify links to MacReady and cpsm at that time.
+The independent `fuji-mak/MacReady` repository contains the standalone release.
+Publish tag `v0.1.0` with the versioned package, `MacReady.pkg`, and
+`SHA256SUMS.txt`, then verify the latest-download link and the links to MacReady
+and cpsm.
 
-Replace the candidate notice with the actual release download once published. Date the changelog, create the matching version tag, and attach the versioned package, stable package, and checksums. Keep author attribution and Capsomnia/cpsm relationships visible in the README.
+Keep the dated changelog, release download, author attribution, and
+Capsomnia/cpsm relationships visible in the README.
 
-Capsomnia Tools may consume the reviewed MacReady executable and this repository's `skills/macready/SKILL.md`. It is a separate signed installer with its own review and notarization. Rebuilding that bundle must not silently take an unreviewed MacReady version. Capsomnia's main app installer remains separate from both tool installers.
+Capsomnia Tools may consume the reviewed MacReady executable and this repository's `skills/macready/SKILL.md`. It is a separate signed installer with its own review and notarization. Rebuilding that bundle must use an explicitly selected MacReady version. Capsomnia's main app installer remains separate from both tool installers.
