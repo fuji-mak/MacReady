@@ -121,7 +121,7 @@ This repository also provides the `MacStateCore` Swift library. Capsomnia uses a
 ## Related projects and author
 
 - [Capsomnia](https://github.com/fuji-mak/Capsomnia): the Mac app that ties awake mode to Caps Lock.
-- [cpsm — Capsomnia CLI & Skill](https://github.com/fuji-mak/cpsm): controls Capsomnia, including awake mode, timers, and settings. It requires Capsomnia 4.0.0+; the generally available 3.5.0 app does not include its CLI service.
+- [cpsm — Capsomnia CLI & Skill](https://github.com/fuji-mak/cpsm): controls Capsomnia, including awake mode, timers, and settings. It requires Capsomnia 4.0.0 or later, available from [Capsomnia Releases](https://github.com/fuji-mak/Capsomnia/releases/latest).
 - **MacReady**: observes the Mac's state and works independently.
 
 Created by [Taketo Fujimaki](https://github.com/fuji-mak). Explore the author's profile for related work and contact information. Contributions and reports should include the command, macOS version, Mac model, and any unavailable fields relevant to the issue.
