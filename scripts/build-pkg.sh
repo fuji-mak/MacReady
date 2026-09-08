@@ -43,7 +43,7 @@ fi
 /usr/bin/install -m 0644 "$ROOT_DIR/resources/installer/README.txt" "$WORK_DIR/resources/README.txt"
 
 make_skill_pkg() {
-  local destination="$1" receipt="$2" relative="$3"
+  local destination="$1" receipt="$2"
   local scripts_dir="$WORK_DIR/$destination-scripts"
   local encoded="$(/usr/bin/base64 < "$SKILL_SOURCE" | /usr/bin/tr -d '\n')"
   /bin/mkdir -p "$scripts_dir"
@@ -66,21 +66,21 @@ if [[ -z "\$console_home" || "\$console_home" != /* || "\$console_home" == / ]];
   exit 1
 fi
 script_dir="\$(cd "\$(dirname "\$0")" && pwd)"
-/usr/bin/sudo -u "\$console_user" /bin/zsh -s -- "\$console_home" "$relative" "$SKILL" '$encoded' < "\$script_dir/install-skill-user.sh"
+  /usr/bin/sudo -u "\$console_user" /bin/zsh -s -- "\$console_home" "$SKILL" '$encoded' < "\$script_dir/install-skill-user.sh"
 EOF
   /bin/chmod 0755 "$scripts_dir/postinstall"
   /usr/bin/pkgbuild --nopayload --scripts "$scripts_dir" --identifier "$LABEL.$receipt" --version "$VERSION" "$DIST_DIR/components/$CLI-$destination-skill.pkg"
 }
 
 /usr/bin/pkgbuild --root "$WORK_DIR/root" --ownership recommended --identifier "$LABEL.cli" --version "$VERSION" --install-location / "$DIST_DIR/components/$CLI-cli.pkg"
-make_skill_pkg codex codex .codex/skills
-make_skill_pkg claude claude-code .claude/skills
+make_skill_pkg codex codex
+make_skill_pkg claude claude-code
 
 /bin/cat > "$WORK_DIR/distribution.xml" <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
   <title>$PRODUCT CLI &amp; Skill</title>
-  <options customize="always" require-scripts="false" hostArchitectures="arm64,x86_64" />
+  <options customize="never" require-scripts="false" hostArchitectures="arm64,x86_64" />
   <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true" />
   <volume-check script="true">
     <allowed-os-versions><os-version min="13.5" /></allowed-os-versions>
@@ -88,12 +88,13 @@ make_skill_pkg claude claude-code .claude/skills
   <readme file="README.txt" />
   <choices-outline>
     <line choice="cli" />
-    <line choice="skills"><line choice="codex" /><line choice="claude" /></line>
+    <line choice="shared-skills" />
   </choices-outline>
   <choice id="cli" title="$CLI CLI (required)" description="Install /usr/local/bin/$CLI." start_selected="true" enabled="false"><pkg-ref id="$LABEL.cli" /></choice>
-  <choice id="skills" title="Skillをインストール / Install Skill" description="同じSkillの導入先を選択します。Choose destinations for the same Skill." start_selected="true" />
-  <choice id="codex" title="Codex" description="~/.codex/skills/$SKILL" start_selected="true"><pkg-ref id="$LABEL.codex" /></choice>
-  <choice id="claude" title="Claude Code" description="~/.claude/skills/$SKILL" start_selected="true"><pkg-ref id="$LABEL.claude-code" /></choice>
+  <choice id="shared-skills" title="CLI &amp; Skill" description="Install the CLI and compatible AI Skill." start_selected="true" enabled="false">
+    <pkg-ref id="$LABEL.codex" />
+    <pkg-ref id="$LABEL.claude-code" />
+  </choice>
   <pkg-ref id="$LABEL.cli" version="$VERSION">$CLI-cli.pkg</pkg-ref>
   <pkg-ref id="$LABEL.codex" version="$VERSION">$CLI-codex-skill.pkg</pkg-ref>
   <pkg-ref id="$LABEL.claude-code" version="$VERSION">$CLI-claude-skill.pkg</pkg-ref>

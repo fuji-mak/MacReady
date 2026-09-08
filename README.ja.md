@@ -6,7 +6,7 @@ AIエージェントに、Macの電源・バッテリー・熱・蓋・スリー
 
 [English](README.md) · [変更履歴](CHANGELOG.md) · [配布準備](docs/releasing.md) · [MITライセンス](LICENSE)
 
-> **v0.1.0は2026年9月8日に公開した初回リリースです。** MacReadyはCapsomniaを必要としない、単独利用可能なツールです。
+> **v0.1.1は2026年9月8日現在の公開版です。** MacReadyはCapsomniaを必要としない、単独利用可能なツールです。
 
 [MacReady.pkgをダウンロード](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
 
@@ -25,7 +25,7 @@ Capsomniaアプリ、実行時のsudo、常駐、外部通信は不要です。�
 
 ## インストール
 
-**macOS 13.5以降**が必要です。MacReady 0.1.0のパッケージはApple silicon／Intelの
+**macOS 13.5以降**が必要です。MacReady 0.1.1のパッケージはApple silicon／Intelの
 universal binaryです。
 
 [`MacReady.pkg`](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)を開きます。
@@ -33,10 +33,10 @@ universal binaryです。
 | 内容 | 配置先 |
 | --- | --- |
 | 必須CLI | `/usr/local/bin/macready` |
-| 任意のCodex用Skill | `~/.codex/skills/macready/SKILL.md` |
-| 任意のClaude Code用Skill | `~/.claude/skills/macready/SKILL.md` |
+| 共通Skill | `~/.agents/skills/macready/SKILL.md` |
+| Claude Codeのリンク | `~/.claude/skills/macready` |
 
-Skill本文は同じで、CodexとClaude Codeは配置先の選択です。インストール時は`/usr/local/bin`への書き込みのため管理者認証が必要ですが、実行時は不要です。SkillはMacのコンソールセッションにログインしているユーザーのホームに配置します。
+Skillは共通先へ自動導入され、CodexとClaude Codeから利用できます。導入先の選択はありません。インストール時は`/usr/local/bin`への書き込みのため管理者認証が必要ですが、実行時は不要です。SkillはMacのコンソールセッションにログインしているユーザーのホームに配置します。
 
 Capsomniaの詳細設定から取得する[**Capsomnia Tools**](https://github.com/fuji-mak/cpsm/releases/latest/download/Capsomnia-Tools.pkg)にも、
 `cpsm`と両方のSkillと一緒に含まれます。Capsomniaアプリ本体のpkgとは別の配布物です。
@@ -82,14 +82,14 @@ swift test
 SKIP_SIGNING=true ./scripts/build-pkg.sh
 ```
 
-パッケージスクリプトは標準で両アーキテクチャをビルドし、`dist/MacReady-0.1.0.pkg`、`dist/MacReady.pkg`、`dist/SHA256SUMS.txt`を生成します。署名・公証・公開前確認は[配布準備](docs/releasing.md)を参照してください。
+パッケージスクリプトは標準で両アーキテクチャをビルドし、`dist/MacReady-0.1.1.pkg`、`dist/MacReady.pkg`、`dist/SHA256SUMS.txt`を生成します。署名・公証・公開前確認は[配布準備](docs/releasing.md)を参照してください。
 
 `MacStateCore`ライブラリもこのリポジトリに含みます。Capsomniaはそのコピーを取り込んで状態読み取りを共有しますが、MacReadyの実行にはCapsomniaは必要ありません。[互換性](docs/compatibility.md)も参照してください。
 
 ## 関連作品・作者
 
 - [Capsomnia](https://github.com/fuji-mak/Capsomnia)：Caps Lockとスリープ抑止を結び付けるMacアプリ。
-- [**cpsm — Capsomnia CLI & Skill**](https://github.com/fuji-mak/cpsm)：Capsomniaのスリープ抑止・タイマー・設定を操作するツール。Capsomnia 4.0.0以降が必要で、一般公開中の3.5.0にはCLIの受付機能がありません。
+- [**cpsm — Capsomnia CLI & Skill**](https://github.com/fuji-mak/cpsm)：Capsomniaのスリープ抑止・タイマー・設定を操作するツール。Capsomnia 4.0.0以降に対応します。
 - **MacReady**：Macの状態を観測する、単独で動くツール。
 
 作者：[Taketo Fujimaki](https://github.com/fuji-mak)。関連作品や連絡先はプロフィールから確認できます。不具合の報告では、コマンド、macOSのバージョン、Macの機種、関係する取得不能項目を添えてください。
@@ -100,10 +100,8 @@ SKIP_SIGNING=true ./scripts/build-pkg.sh
 
 ```sh
 sudo rm /usr/local/bin/macready
-rm ~/.codex/skills/macready/SKILL.md
-rmdir ~/.codex/skills/macready
-rm ~/.claude/skills/macready/SKILL.md
-rmdir ~/.claude/skills/macready
+rm -r ~/.agents/skills/macready
+rm ~/.claude/skills/macready
 ```
 
 導入していない配置先のコマンドは省いてください。`rmdir`は、追加したファイルがあるディレクトリを削除しません。

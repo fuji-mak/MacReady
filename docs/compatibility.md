@@ -6,7 +6,7 @@
 | Architectures | Package builds Apple silicon `arm64` and Intel `x86_64`. Building both is not equivalent to testing both on hardware. |
 | CLI | `macready [status] [--json]`, help, and version. No Capsomnia dependency. |
 | JSON | `schema_version: 1`. Consumers should reject unsupported schema versions, tolerate extra fields, and retain null/unknown values. |
-| Skill | One `macready` Skill, optionally copied to Codex and Claude Code directories. The agent must be able to execute a local command. |
+| Skill | One `macready` Skill installed in `~/.agents/skills/macready`, with a Claude Code compatibility link. The agent must be able to execute a local command. |
 | Capsomnia Tools | Can package this CLI and Skill alongside `cpsm` and the `capsomnia` Skill. No app is needed for MacReady itself. |
 | `MacStateCore` | Swift library source in this repository is authoritative. Capsomnia vendors a copy for its own offline build. |
 

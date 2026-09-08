@@ -6,7 +6,7 @@ MacReady is a small, read-only macOS CLI and agent Skill by [Taketo Fujimaki](ht
 
 [日本語](README.ja.md) · [Changelog](CHANGELOG.md) · [Release preparation](docs/releasing.md) · [MIT license](LICENSE)
 
-> **v0.1.0 — first public release, September 8, 2026.** MacReady is
+> **v0.1.1 — current public release, September 8, 2026.** MacReady is
 > independently usable and does not require Capsomnia.
 
 [Download MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
@@ -26,7 +26,7 @@ MacReady exits after each snapshot. It does not require Capsomnia, elevated priv
 
 ## Install
 
-Requires **macOS 13.5 or later**. MacReady 0.1.0 ships as a universal
+Requires **macOS 13.5 or later**. MacReady 0.1.1 ships as a universal
 Apple silicon / Intel package.
 
 Open the [MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg).
@@ -35,10 +35,10 @@ The installer contains:
 | Component | Destination |
 | --- | --- |
 | Required `macready` CLI | `/usr/local/bin/macready` |
-| Optional Skill for Codex | `~/.codex/skills/macready/SKILL.md` |
-| Optional Skill for Claude Code | `~/.claude/skills/macready/SKILL.md` |
+| Shared Skill | `~/.agents/skills/macready/SKILL.md` |
+| Claude Code link | `~/.claude/skills/macready` |
 
-The Skill contents are identical; Codex and Claude Code are installation destinations. Installer authentication is required to write `/usr/local/bin`; running MacReady needs no `sudo`. Skill choices target the user logged in to the Mac's console session.
+Codex and Claude Code use the same shared Skill; the installer has no agent destination choices. Installer authentication is required to write `/usr/local/bin`; running MacReady needs no `sudo`. The Skill targets the user logged in to the Mac's console session.
 
 MacReady can also be included with `cpsm` and both Skills in
 [Capsomnia Tools](https://github.com/fuji-mak/cpsm/releases/latest/download/Capsomnia-Tools.pkg),
@@ -114,7 +114,7 @@ swift test
 SKIP_SIGNING=true ./scripts/build-pkg.sh
 ```
 
-The package script builds both architectures by default and writes `dist/MacReady-0.1.0.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and release verification.
+The package script builds both architectures by default and writes `dist/MacReady-0.1.1.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and release verification.
 
 This repository also provides the `MacStateCore` Swift library. Capsomnia uses a vendored copy of that library for shared state observations; MacReady's executable has no dependency on the app. See [compatibility](docs/compatibility.md).
 
@@ -134,13 +134,11 @@ Remove only the components you installed. If MacReady came from Capsomnia Tools,
 sudo rm /usr/local/bin/macready
 sudo rm /usr/local/share/macready/LICENSE
 sudo rmdir /usr/local/share/macready
-rm ~/.codex/skills/macready/SKILL.md
-rmdir ~/.codex/skills/macready
-rm ~/.claude/skills/macready/SKILL.md
-rmdir ~/.claude/skills/macready
+rm -r ~/.agents/skills/macready
+rm ~/.claude/skills/macready
 ```
 
-Omit destinations that were not installed. `rmdir` leaves a non-empty directory intact if you added other files.
+`rm ~/.claude/skills/macready` removes the compatibility link. `rmdir` leaves a non-empty directory intact if you added other files.
 
 ## Sources and known coverage
 

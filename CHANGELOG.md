@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1 — 2026-09-08
+
+- Unified Skill installation in `~/.agents/skills`, with a Claude Code compatibility symlink.
+- Updated standalone and combined distribution documentation for the Capsomnia 4.0.0+ release line.
+- Added installer coverage for shared Skill migration and conflict handling.
+
 ## 0.1.0 — 2026-09-08
 
 Initial public release.
@@ -8,7 +14,7 @@ Initial public release.
 - Power source, battery presence, capacity, charging, battery temperature, thermal state, lid, external display, and global sleep setting observations.
 - JSON schema version 1, UTC capture time, and explicit unavailable fields.
 - Shared `macready` Skill for Codex and Claude Code.
-- Standalone installer with optional Skill destinations; compatible with bundled Capsomnia Tools distribution.
+- Standalone installer with shared Codex/Claude Code Skill installation; compatible with bundled Capsomnia Tools distribution.
 - Independent `MacStateCore` Swift package library for shared observations.
 - macOS 13.5 minimum target and universal Apple silicon / Intel package build.
 

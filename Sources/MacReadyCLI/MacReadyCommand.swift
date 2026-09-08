@@ -19,7 +19,7 @@ enum MacReadyCommand {
 
     static func run(_ arguments: [String], read: () -> MacSnapshot = MacSnapshot.read) -> (Int32, String) {
         if arguments == ["--help"] || arguments == ["help"] || arguments == ["-h"] { return (0, help) }
-        if arguments == ["--version"] || arguments == ["version"] { return (0, "macready 0.1.0") }
+        if arguments == ["--version"] || arguments == ["version"] { return (0, "macready 0.1.1") }
         let json = arguments.contains("--json")
         let commands = arguments.filter { $0 != "--json" }
         guard commands.isEmpty || commands == ["status"], arguments.filter({ $0 == "--json" }).count <= 1 else {

@@ -21,6 +21,8 @@ jobs:
         run: swift build -c release --product macready
       - name: Test snapshot semantics
         run: swift test
+      - name: Test shared Skill installer in a temporary home
+        run: ./scripts/test-install-skill-user.sh
       - name: Verify CLI version and JSON output
         run: |
           test "$(.build/release/macready --version)" = "macready $(cat VERSION)"
