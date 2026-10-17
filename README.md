@@ -6,7 +6,7 @@ MacReady is a small, read-only macOS CLI and agent Skill by [Taketo Fujimaki](ht
 
 [日本語](README.ja.md) · [Changelog](CHANGELOG.md) · [Release preparation](docs/releasing.md) · [MIT license](LICENSE)
 
-> **v0.1.1 — current public release, September 8, 2026.** MacReady is
+> **v0.2.0 — current public release, October 18, 2026.** MacReady is
 > independently usable and does not require Capsomnia.
 
 [Download MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
@@ -18,7 +18,7 @@ macready status --json
 ## What it reads
 
 - Power source, battery presence, battery percentage, and charging state.
-- Battery temperature and macOS thermal state.
+- Battery and CPU temperatures, and macOS thermal state.
 - Lid state, external display connection, and the global `SleepDisabled` setting.
 - Capture time and explicit reasons for unavailable observations.
 
@@ -26,7 +26,7 @@ MacReady exits after each snapshot. It does not require Capsomnia, elevated priv
 
 ## Install
 
-Requires **macOS 13.5 or later**. MacReady 0.1.1 ships as a universal
+Requires **macOS 13.5 or later**. MacReady 0.2.0 ships as a universal
 Apple silicon / Intel package.
 
 Open the [MacReady.pkg](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg).
@@ -72,15 +72,16 @@ Example JSON, abbreviated and illustrative:
     "battery_celsius": 27.15,
     "battery_raw": 3003,
     "battery_source": "AppleSmartBattery.Temperature (Smart Battery 0.1 K)",
-    "cpu_celsius": null,
+    "cpu_celsius": 45.5,
+    "cpu_source": "AppleSMC (mean of available CPU sensors)",
+    "cpu_sensors": [{"key": "Te05", "celsius": 44.0}, {"key": "Tp01", "celsius": 47.0}],
     "gpu_celsius": null
   },
   "lid_closed": false,
   "external_display_connected": false,
   "sleep_disabled": false,
   "unavailable": {
-    "temperature.cpu_celsius": "CPU temperature is not supported by MacReady 0.1.",
-    "temperature.gpu_celsius": "GPU temperature is not supported by MacReady 0.1."
+    "temperature.gpu_celsius": "GPU temperature is not supported by MacReady."
   }
 }
 ```
@@ -92,7 +93,9 @@ Example JSON, abbreviated and illustrative:
 | `power.source` | `ac`, `battery`, `ups`, or `unknown`. AC power does not mean the battery is charging. |
 | `thermal_state` | `nominal`, `fair`, `serious`, `critical`, or `unknown`. macOS can report `nominal` for an unsupported or unknown state, so it is not a safety guarantee. |
 | `temperature.battery_celsius` | Battery temperature, not CPU/GPU temperature. IORegistry `Temperature` is converted from Smart Battery 0.1 K using `raw / 10 - 273.15`. This property is not a stable public API. |
-| `temperature.cpu_celsius` / `gpu_celsius` | Unsupported in 0.1; always `null`. |
+| `temperature.cpu_celsius` | Mean of the readable, valid mapped CPU thermal-zone sensors, in °C. Not the hottest sensor or a per-core temperature. Uses private AppleSMC access; may be unavailable by hardware/macOS version. |
+| `temperature.cpu_source` / `cpu_sensors` | Reading source and contributing SMC keys/values. When unavailable, the source is `null` and sensors are `[]`; see `unavailable`. |
+| `temperature.gpu_celsius` | Unsupported; always `null`. |
 | `lid_closed` / `external_display_connected` | Observed state, or `null` when unavailable. A Mac without a lid may have no lid reading. |
 | `sleep_disabled` | System-wide `SleepDisabled` from `pmset -g`. It does not describe all sleep assertions or guarantee that work survives lid closure. |
 | `unavailable` | Reasons for missing readings. A batteryless Mac's capacity and charging values are non-applicable and remain `null`. |
@@ -114,7 +117,7 @@ swift test
 SKIP_SIGNING=true ./scripts/build-pkg.sh
 ```
 
-The package script builds both architectures by default and writes `dist/MacReady-0.1.1.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and release verification.
+The package script builds both architectures by default and writes `dist/MacReady-0.2.0.pkg`, `dist/MacReady.pkg`, and `dist/SHA256SUMS.txt`. See [release preparation](docs/releasing.md) for signing, notarization, and release verification.
 
 This repository also provides the `MacStateCore` Swift library. Capsomnia uses a vendored copy of that library for shared state observations; MacReady's executable has no dependency on the app. See [compatibility](docs/compatibility.md).
 
@@ -142,6 +145,10 @@ rm ~/.claude/skills/macready
 
 ## Sources and known coverage
 
-The readers use IOKit power-source APIs, IORegistry, CoreGraphics displays, Foundation thermal state, and read-only `pmset -g` output. Battery temperature interpretation follows [Apple's PowerManagement source](https://github.com/apple-oss-distributions/PowerManagement/blob/main/AppleSmartBatteryManager/AppleSmartBattery.cpp) and [Smart Battery Data Specification 1.1](https://www.sbs-forum.org/specs/sbdat110.pdf). Thermal behavior is described by [Apple's ProcessInfo.ThermalState documentation](https://developer.apple.com/documentation/foundation/processinfo/thermalstate-swift.enum).
+The readers use IOKit power-source APIs, IORegistry, private AppleSMC user-client reads, CoreGraphics displays, Foundation thermal state, and read-only `pmset -g` output. Battery temperature interpretation follows [Apple's PowerManagement source](https://github.com/apple-oss-distributions/PowerManagement/blob/main/AppleSmartBatteryManager/AppleSmartBattery.cpp) and [Smart Battery Data Specification 1.1](https://www.sbs-forum.org/specs/sbdat110.pdf). Thermal behavior is described by [Apple's ProcessInfo.ThermalState documentation](https://developer.apple.com/documentation/foundation/processinfo/thermalstate-swift.enum).
 
 Initial hardware validation is on the development Mac. Sensor availability varies by model and session; broader hardware and minimum-OS testing remain part of release review.
+
+CPU sensor mappings follow the [Stats sensor table](https://github.com/exelban/stats/blob/master/Modules/Sensors/values.swift); the SMC protocol is also used by [macmon](https://github.com/vladkens/macmon/blob/main/src/sources.rs). M1–M5 generations have explicit CPU sensor candidates; Intel uses core/die sensors, then package or diode fallback. Unknown processors return `null` rather than guessing from key prefixes. CPU values use SMC `flt ` or `sp78`, independently of battery units. No sensor values are cached or substituted after failure. Apple Silicon on older macOS (including 13.5) may not expose these SMC sensors; there is no IOHID fallback.
+
+CPU temperature has been verified on Apple M4 with macOS 26.3.1. Other processors and minimum-OS runtime coverage remain unverified.

@@ -6,7 +6,7 @@ AIエージェントに、Macの電源・バッテリー・熱・蓋・スリー
 
 [English](README.md) · [変更履歴](CHANGELOG.md) · [配布準備](docs/releasing.md) · [MITライセンス](LICENSE)
 
-> **v0.1.1は2026年9月8日現在の公開版です。** MacReadyはCapsomniaを必要としない、単独利用可能なツールです。
+> **v0.2.0は2026年10月18日公開の最新版です。** MacReadyはCapsomniaを必要としない、単独利用可能なツールです。
 
 [MacReady.pkgをダウンロード](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)
 
@@ -17,7 +17,7 @@ macready status --json
 ## 読み取れるもの
 
 - 電源種別、バッテリーの有無・残量・充電中かどうか。
-- バッテリー温度とmacOSの熱状態。
+- バッテリー・CPU温度とmacOSの熱状態。
 - 蓋、外部ディスプレイ、システム全体の`SleepDisabled`設定。
 - 取得時刻と、取得できなかった項目の理由。
 
@@ -25,7 +25,7 @@ Capsomniaアプリ、実行時のsudo、常駐、外部通信は不要です。�
 
 ## インストール
 
-**macOS 13.5以降**が必要です。MacReady 0.1.1のパッケージはApple silicon／Intelの
+**macOS 13.5以降**が必要です。MacReady 0.2.0のパッケージはApple silicon／Intelの
 universal binaryです。
 
 [`MacReady.pkg`](https://github.com/fuji-mak/MacReady/releases/latest/download/MacReady.pkg)を開きます。
@@ -60,7 +60,9 @@ JSONの全体例は[英語README](README.md)にあります。
 | `power.battery_present` | バッテリーの有無。`battery_percent`は残量、`charging`は充電中かどうかです。 |
 | `thermal_state` | `nominal` / `fair` / `serious` / `critical` / `unknown`。macOSは非対応・不明時にも`nominal`を返しうるため、安全の保証ではありません。 |
 | `temperature.battery_celsius` | バッテリー温度です。IORegistryの`Temperature`をSmart Battery形式の0.1 Kとして`raw / 10 - 273.15`で℃へ換算します。安定した公開APIではないため、生値と出典名も返します。 |
-| `temperature.cpu_celsius` / `gpu_celsius` | 0.1では未対応のため常に`null`です。 |
+| `temperature.cpu_celsius` | 読めた有効な既知CPUセンサーの平均温度（℃）です。最高温度や各コアの温度ではありません。非公開のAppleSMC読み取りを使うため、機種・macOSにより取得できない場合があります。 |
+| `temperature.cpu_source` / `cpu_sensors` | 取得元と、平均に使ったSMCキー・各温度です。取得不能時は取得元が`null`、センサーが`[]`になり、理由を`unavailable`へ出力します。 |
+| `temperature.gpu_celsius` | 未対応のため常に`null`です。 |
 | `lid_closed` / `external_display_connected` | 蓋・外部ディスプレイの観測結果。取得不能時は`null`です。蓋のないMacでは蓋の値を取得できない場合があります。 |
 | `sleep_disabled` | `pmset -g`が返すシステム全体の`SleepDisabled`です。個別プロセスのsleep assertionや蓋を閉じたときの作業継続を保証しません。 |
 | `unavailable` | 取得不能項目の理由。バッテリー非搭載時の残量・充電値の`null`は非該当です。 |
@@ -82,7 +84,7 @@ swift test
 SKIP_SIGNING=true ./scripts/build-pkg.sh
 ```
 
-パッケージスクリプトは標準で両アーキテクチャをビルドし、`dist/MacReady-0.1.1.pkg`、`dist/MacReady.pkg`、`dist/SHA256SUMS.txt`を生成します。署名・公証・公開前確認は[配布準備](docs/releasing.md)を参照してください。
+パッケージスクリプトは標準で両アーキテクチャをビルドし、`dist/MacReady-0.2.0.pkg`、`dist/MacReady.pkg`、`dist/SHA256SUMS.txt`を生成します。署名・公証・公開前確認は[配布準備](docs/releasing.md)を参照してください。
 
 `MacStateCore`ライブラリもこのリポジトリに含みます。Capsomniaはそのコピーを取り込んで状態読み取りを共有しますが、MacReadyの実行にはCapsomniaは必要ありません。[互換性](docs/compatibility.md)も参照してください。
 
@@ -108,6 +110,10 @@ rm ~/.claude/skills/macready
 
 ## 根拠と確認範囲
 
-電源はIOKit、温度・蓋はIORegistry、ディスプレイはCoreGraphics、熱状態はFoundation、スリープ設定は読み取り専用の`pmset -g`を使用します。温度の形式は[Apple公開PowerManagementソース](https://github.com/apple-oss-distributions/PowerManagement/blob/main/AppleSmartBatteryManager/AppleSmartBattery.cpp)と[Smart Battery Data Specification 1.1](https://www.sbs-forum.org/specs/sbdat110.pdf)、熱状態は[Apple公式ドキュメント](https://developer.apple.com/documentation/foundation/processinfo/thermalstate-swift.enum)を根拠としています。
+電源はIOKit、バッテリー温度・蓋はIORegistry、CPU温度は非公開のAppleSMC読み取り、ディスプレイはCoreGraphics、熱状態はFoundation、スリープ設定は読み取り専用の`pmset -g`を使用します。温度の形式は[Apple公開PowerManagementソース](https://github.com/apple-oss-distributions/PowerManagement/blob/main/AppleSmartBatteryManager/AppleSmartBattery.cpp)と[Smart Battery Data Specification 1.1](https://www.sbs-forum.org/specs/sbdat110.pdf)、熱状態は[Apple公式ドキュメント](https://developer.apple.com/documentation/foundation/processinfo/thermalstate-swift.enum)を根拠としています。
 
 初期の実機確認は開発中のMacで行っています。センサーの取得可否は機種・セッションにより異なり、他機種と最小対応OSでの確認は公開前の確認項目です。
+
+CPUセンサーの選別は[Statsのセンサー表](https://github.com/exelban/stats/blob/master/Modules/Sensors/values.swift)、SMC通信形式は[macmonの実装](https://github.com/vladkens/macmon/blob/main/src/sources.rs)を参照しています。M1〜M5は世代別の既知CPUキー、Intelはコア・ダイの候補を使い、なければパッケージ、ダイオードの順で読みます。未知のCPUではキーの接頭辞から推測せず`null`を返します。CPUの単位はSMCの`flt `／`sp78`から変換し、バッテリーの単位とは分けています。失敗時に過去の値で補いません。古いmacOS（13.5を含む）のApple SiliconではSMCセンサーが公開されない場合があり、IOHIDへのフォールバックはありません。
+
+CPU温度の実機確認はApple M4・macOS 26.3.1で行いました。他のCPU・最小対応OSでの実動作は未検証です。

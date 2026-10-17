@@ -36,8 +36,10 @@ public struct MacSnapshot: Encodable {
         let sleep = SleepStateReader.isDisabled()
         let temperature = TemperatureReader.read()
         var unavailable: [String: String] = [:]
-        unavailable["temperature.cpu_celsius"] = "CPU temperature is not supported by MacReady 0.1."
-        unavailable["temperature.gpu_celsius"] = "GPU temperature is not supported by MacReady 0.1."
+        if temperature.cpuCelsius == nil {
+            unavailable["temperature.cpu_celsius"] = temperature.cpuUnavailableReason ?? "CPU temperature could not be read."
+        }
+        unavailable["temperature.gpu_celsius"] = "GPU temperature is not supported by MacReady."
         if temperature.batteryCelsius == nil {
             unavailable["temperature.battery_celsius"] = "Battery sensor is absent or returned an invalid value."
         }
@@ -85,6 +87,7 @@ public struct MacSnapshot: Encodable {
             "System sleep disabled: \(flag(sleepDisabled))"
         ]
         lines.insert("Battery temperature: " + (temperature.batteryCelsius.map { "\($0) °C" } ?? "unknown"), at: 5)
+        lines.insert("CPU temperature (sensor mean): " + (temperature.cpuCelsius.map { "\($0) °C" } ?? "unknown"), at: 6)
         lines += unavailable.sorted { $0.key < $1.key }.map { "Unavailable: \($0.key) — \($0.value)" }
         return lines.joined(separator: "\n")
     }

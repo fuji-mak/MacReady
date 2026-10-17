@@ -9,7 +9,7 @@ enum MacReadyCommand {
            macready help | --help
            macready --version
 
-    Reports power, battery temperature, thermal state, lid, external display and the
+    Reports power, battery and CPU temperature, thermal state, lid, external display and the
     global SleepDisabled setting. It does not change any system setting.
     Missing observations are null/unknown with reasons, never assumed safe.
     Each invocation reads a fresh snapshot; it does not run in the background.
@@ -19,7 +19,7 @@ enum MacReadyCommand {
 
     static func run(_ arguments: [String], read: () -> MacSnapshot = MacSnapshot.read) -> (Int32, String) {
         if arguments == ["--help"] || arguments == ["help"] || arguments == ["-h"] { return (0, help) }
-        if arguments == ["--version"] || arguments == ["version"] { return (0, "macready 0.1.1") }
+        if arguments == ["--version"] || arguments == ["version"] { return (0, "macready 0.2.0") }
         let json = arguments.contains("--json")
         let commands = arguments.filter { $0 != "--json" }
         guard commands.isEmpty || commands == ["status"], arguments.filter({ $0 == "--json" }).count <= 1 else {

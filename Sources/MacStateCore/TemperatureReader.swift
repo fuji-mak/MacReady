@@ -5,12 +5,27 @@ public struct TemperatureSnapshot: Encodable {
     public let batteryCelsius: Double?
     public let batteryRaw: Int?
     public let batterySource = "AppleSmartBattery.Temperature (Smart Battery 0.1 K)"
+    public let cpuCelsius: Double?
+    public let cpuSource: String?
+    public let cpuSensors: [CPUTemperatureSensor]
+    let cpuUnavailableReason: String?
+
+    init(batteryCelsius: Double?, batteryRaw: Int?, cpu: CPUTemperatureReading = CPUTemperatureReading(sensors: [], unavailableReason: "CPU temperature was not read.")) {
+        self.batteryCelsius = batteryCelsius
+        self.batteryRaw = batteryRaw
+        self.cpuCelsius = cpu.celsius
+        self.cpuSource = cpu.source
+        self.cpuSensors = cpu.sensors
+        self.cpuUnavailableReason = cpu.unavailableReason
+    }
 
     enum CodingKeys: String, CodingKey {
         case batteryCelsius = "battery_celsius"
         case batteryRaw = "battery_raw"
         case batterySource = "battery_source"
         case cpuCelsius = "cpu_celsius"
+        case cpuSource = "cpu_source"
+        case cpuSensors = "cpu_sensors"
         case gpuCelsius = "gpu_celsius"
     }
 
@@ -19,19 +34,22 @@ public struct TemperatureSnapshot: Encodable {
         try values.encode(batteryCelsius, forKey: .batteryCelsius)
         try values.encode(batteryRaw, forKey: .batteryRaw)
         try values.encode(batterySource, forKey: .batterySource)
-        try values.encodeNil(forKey: .cpuCelsius)
+        try values.encode(cpuCelsius, forKey: .cpuCelsius)
+        try values.encode(cpuSource, forKey: .cpuSource)
+        try values.encode(cpuSensors, forKey: .cpuSensors)
         try values.encodeNil(forKey: .gpuCelsius)
     }
 }
 
 public enum TemperatureReader {
     public static func read() -> TemperatureSnapshot {
+        let cpu = CPUTemperatureReader.read()
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSmartBattery"))
-        guard service != 0 else { return TemperatureSnapshot(batteryCelsius: nil, batteryRaw: nil) }
+        guard service != 0 else { return TemperatureSnapshot(batteryCelsius: nil, batteryRaw: nil, cpu: cpu) }
         defer { IOObjectRelease(service) }
         let raw = (IORegistryEntryCreateCFProperty(service, "Temperature" as CFString,
                                                  kCFAllocatorDefault, 0)?.takeRetainedValue() as? NSNumber)?.intValue
-        return TemperatureSnapshot(batteryCelsius: raw.flatMap(celsius), batteryRaw: raw)
+        return TemperatureSnapshot(batteryCelsius: raw.flatMap(celsius), batteryRaw: raw, cpu: cpu)
     }
 
     // Apple's open-source AppleSmartBattery.cpp preserves Smart Battery format

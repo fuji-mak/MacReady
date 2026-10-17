@@ -1,6 +1,6 @@
 # Release preparation
 
-MacReady 0.1.1 is the current public release line. These steps remain the
+MacReady 0.2.0 is the current public release. These steps remain the
 repeatable build, signing, notarization, and release verification workflow.
 
 ## Review the release build
@@ -42,7 +42,7 @@ APP_SIGN_ID='Developer ID Application: Your Name (TEAMID)' \
 PKG_SIGN_ID='Developer ID Installer: Your Name (TEAMID)' \
 ./scripts/build-pkg.sh
 
-pkgutil --check-signature dist/MacReady-0.1.1.pkg
+pkgutil --check-signature dist/MacReady-0.2.0.pkg
 
 NOTARY_PROFILE='your-keychain-profile' ./scripts/notarize-pkg.sh dist
 ```
@@ -50,8 +50,8 @@ NOTARY_PROFILE='your-keychain-profile' ./scripts/notarize-pkg.sh dist
 The notarization script submits the package with `notarytool --wait`, staples the accepted ticket, updates the stable package copy, and regenerates checksums. Confirm the script succeeds, then validate the final versioned package:
 
 ```sh
-xcrun stapler validate dist/MacReady-0.1.1.pkg
-spctl --assess --type install --verbose=2 dist/MacReady-0.1.1.pkg
+xcrun stapler validate dist/MacReady-0.2.0.pkg
+spctl --assess --type install --verbose=2 dist/MacReady-0.2.0.pkg
 (cd dist && shasum -a 256 -c SHA256SUMS.txt)
 ```
 
@@ -60,7 +60,7 @@ Re-test installation of this exact package on a clean review account or machine 
 ## Publish manually
 
 The independent `fuji-mak/MacReady` repository contains the standalone release.
-Publish tag `v0.1.1` with the versioned package, `MacReady.pkg`, and
+Publish tag `v0.2.0` with the versioned package, `MacReady.pkg`, and
 `SHA256SUMS.txt`, then verify the latest-download link and the links to MacReady
 and cpsm.
 

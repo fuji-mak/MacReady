@@ -9,7 +9,8 @@ let package = Package(
         .executable(name: "macready", targets: ["MacReadyCLI"])
     ],
     targets: [
-        .target(name: "MacStateCore"),
+        .target(name: "SMCBridge", linkerSettings: [.linkedFramework("IOKit")]),
+        .target(name: "MacStateCore", dependencies: ["SMCBridge"]),
         .executableTarget(name: "MacReadyCLI", dependencies: ["MacStateCore"]),
         .testTarget(name: "MacStateCoreTests", dependencies: ["MacStateCore", "MacReadyCLI"])
     ],

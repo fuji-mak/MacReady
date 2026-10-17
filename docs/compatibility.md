@@ -1,6 +1,6 @@
 # Compatibility
 
-| Component | 0.1 contract |
+| Component | Current source contract |
 | --- | --- |
 | macOS | Deployment target 13.5 or later. Hardware/session-dependent readings can be unavailable. |
 | Architectures | Package builds Apple silicon `arm64` and Intel `x86_64`. Building both is not equivalent to testing both on hardware. |
@@ -10,6 +10,6 @@
 | Capsomnia Tools | Can package this CLI and Skill alongside `cpsm` and the `capsomnia` Skill. No app is needed for MacReady itself. |
 | `MacStateCore` | Swift library source in this repository is authoritative. Capsomnia vendors a copy for its own offline build. |
 
-Version 0.1 does not promise a stable Swift library API. When changing `MacStateCore`, update the vendored Capsomnia copy and its source/version record together, then run both projects' tests. JSON changes that invalidate existing field meanings or types require a schema version change.
+Versions before 1.0 do not promise a stable Swift library API. When changing `MacStateCore`, update the vendored Capsomnia copy and its source/version record together, then run both projects' tests. JSON changes that invalidate existing field meanings or types require a schema version change.
 
-Battery temperature relies on an IORegistry property that may vary across hardware or macOS releases. CPU/GPU temperatures are not implemented. Thermal `nominal` and `sleep_disabled: true` are observations, not promises of safe operation or continued work.
+Battery temperature relies on an IORegistry property that may vary across hardware or macOS releases. CPU temperature is the mean of readable mapped AppleSMC CPU sensors, with additive `cpu_source` and `cpu_sensors` fields in schema 1. Explicit sensor candidates cover M1–M5 and Intel, but only M4/macOS 26.3.1 has been verified on hardware. Unsupported processors, unavailable SMC access (including some older macOS versions), and invalid readings return null with a reason. There is no IOHID fallback. GPU temperature is not implemented. Thermal `nominal` and `sleep_disabled: true` are observations, not promises of safe operation or continued work.

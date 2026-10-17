@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-10-18
+
+- Added read-only CPU temperature through AppleSMC, without sudo or a background service.
+- Report the mean of available mapped CPU sensors in JSON and text, with source, contributing sensor keys/values, and explicit unavailable reasons.
+- Added generation-specific M1–M5 and Intel CPU sensor candidates, float/fixed-point decoding, and invalid-reading checks. GPU temperature remains unsupported.
+- Verified CPU readings on Apple M4 / macOS 26.3.1; other hardware and older macOS runtime coverage are unverified.
+
 ## 0.1.1 — 2026-09-08
 
 - Unified Skill installation in `~/.agents/skills`, with a Claude Code compatibility symlink.
