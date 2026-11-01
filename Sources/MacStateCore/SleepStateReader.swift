@@ -1,7 +1,7 @@
 import Foundation
 
 public enum SleepStateReader {
-    /// Observes the global SleepDisabled setting, not every process assertion.
+    /// Observes the global SleepDisabled setting, not every process assertion. Does not run the caller's run loop.
     public static func isDisabled() -> Bool? {
         let process = Process()
         let pipe = Pipe()
@@ -9,9 +9,11 @@ public enum SleepStateReader {
         process.arguments = ["-g"]
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
+        let done = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in done.signal() }
         do { try process.run() } catch { return nil }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
+        done.wait()
         guard process.terminationStatus == 0, let text = String(data: data, encoding: .utf8) else { return nil }
         return parse(text)
     }
